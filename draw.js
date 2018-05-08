@@ -9,6 +9,9 @@ var ballY = 200
 
 // ball movement
 var bSpeed = 10
+
+// ball size
+var radius = 10
 /*
 var angle = Math.floor(Math.random() * (90 - 0 + 1)) + 0;
 console.log(angle)
@@ -33,12 +36,12 @@ function draw(){
   // limit the movement of paddles
   p1 = constrain(p1, 5, 295)
   p2 = constrain(p2, 5, 295)
-  ballX = constrain(ballX, 40, 560)
+  ballX = constrain(ballX, 10 + 10, 580)
   // draw ball
-  ellipse(ballX, ballY, 20, 20)
+  ellipse(ballX, ballY, radius * 2, radius * 2)
   // draw paddles
   Paddle(10,p1)
-  Paddle(width - 20, p2)
+  Paddle(width - radius * 2, p2)
   keyPress()
   var x = moveBall()
   if (x === 1){
@@ -56,12 +59,12 @@ function moveBall(){
     return 0
   }
   // handle left/right walls
-  if (ballX <= 40 || ballX >= 560){
+  if (ballX <= 30 ){
+    // creds on the guy on ricket on xna for the idea
+    // logic to calculate new vX and vY based on ball hit location relative to
+    // paddle
     if (ballY >= p1 && ballY <= p1 + plen){
       console.log("paddle hit")
-      // creds on the guy on ricket on xna for the idea
-      // logic to calculate new vX and vY based on ball hit location relative to
-      // paddle
       var relIntersect = (p1 + (plen / 2)) - ballY + 10
       var normalized = (relIntersect / (plen / 2))
       angle = normalized * 5 * Math.PI / 12
@@ -73,15 +76,27 @@ function moveBall(){
       console.log("vY is " + vY)
       return 1
     }
-    else if (ballY >= p2 && ballY <= p2 + plen){
+    else{
+      console.log("game over")
+      vX = 0
+      vY = 0
+      ballX = 300
+      ballY = 200
+      return -1
+    }
+  }
+  else if (ballX >= 570){
+    if (ballY >= p2 && ballY <= p2 + plen){
       console.log("paddle hit")
       var relIntersect = (p2 + (plen / 2)) - ballY + 10
       var normalized = (relIntersect / (plen / 2))
       angle = normalized * 5 * Math.PI / 12
       vX = bSpeed * Math.cos(angle * (180 / Math.PI) + Math.PI / 4)
-      vX = -1 * vX
+      vX = round(1 * vX)
       console.log("vX is " + vX)
       vY = bSpeed * -Math.sin(angle * (180 / Math.PI) + Math.PI / 4)
+      vY = ceil(-1 * vY)
+      console.log("vY is " + vY)
       return 1
     }
     else{
