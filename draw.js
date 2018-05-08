@@ -25,18 +25,21 @@ var vX = -bSpeed
 var vY = 0
 
 function setup(){
-  var width = 600
-  var height = 400
-  createCanvas(width, height)
+ var width = 600
+ var height = 400
+  //var width = screen.width * 0.5;
+  //var height = ceil(width / 1.42222)
+  var canvas = createCanvas(width, height)
+  canvas.parent("canvasContainer")
   frameRate(30)
 }
 
 function draw(){
   background(51)
   // limit the movement of paddles
-  p1 = constrain(p1, 5, 295)
-  p2 = constrain(p2, 5, 295)
-  ballX = constrain(ballX, 10 + 10, 580)
+  p1 = constrain(p1, 5, height - 100 - 5)
+  p2 = constrain(p2, 5, height - 100 - 5)
+  ballX = constrain(ballX, radius*2, width - radius * 2)
   // draw ball
   ellipse(ballX, ballY, radius * 2, radius * 2)
   // draw paddles
@@ -54,7 +57,7 @@ function moveBall(){
   ballX = ballX + vX
   ballY = ballY + vY
   // handle top/bottom
-  if (ballY < 5 || ballY > 400){
+  if (ballY < 5 || ballY > height - 5){
     vY = vY * -1
     return 0
   }
@@ -80,12 +83,12 @@ function moveBall(){
       console.log("game over")
       vX = 0
       vY = 0
-      ballX = 300
-      ballY = 200
+      ballX = width / 2
+      ballY = height / 2
       return -1
     }
   }
-  else if (ballX >= 570){
+  else if (ballX >= width - 30){
     if (ballY >= p2 && ballY <= p2 + plen){
       console.log("paddle hit")
       var relIntersect = (p2 + (plen / 2)) - ballY + 10
@@ -103,8 +106,8 @@ function moveBall(){
       console.log("game over")
       vX = 0
       vY = 0
-      ballX = 300
-      ballY = 200
+      ballX = width / 2
+      ballY = height / 2
       return -1
     }
   }
