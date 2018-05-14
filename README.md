@@ -1,2 +1,2 @@
 # pong
-simple pong game using p5.js
+simple multiplayer pong game using p5.js, jquery and nodejs
