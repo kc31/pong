@@ -10,12 +10,18 @@ app.use(express.static("../client/"))
 var socket = require("socket.io");
 var io = socket(server);
 
-// game variables
-
+// %%%% game variables %%%% 
+// game canvas
+var width = 600
+var height = 400
 // paddles
 var plen = 100
 var p1 = 150
 var p2 = 150
+var p1Move = false;
+var p1Direction
+var p2Move = false;
+var p2Direction
 
 // ball location
 var ballX = 300
@@ -37,6 +43,8 @@ console.log("vY " + vY)
 */
 var vX = -bSpeed
 var vY = 0
+// %%%% end of game variables %%%% 
+
 
 // what to do when socket is active
 io.on('connection', function(socket){
@@ -45,21 +53,135 @@ io.on('connection', function(socket){
   socket.on("keyPress", function(data){
     if (data.direction === "up"){
       console.log("server says received " + data.direction + " press from " + socket.id)
+      p1Move = true
+      p1Direction = 1
+      console.log("shoulda changed p1Move")
     } 
     else if (data.direction === "down"){
       console.log("server says received " + data.direction + " press from " + socket.id)
+      p1Move = true
+      p1Direction = -1
+      console.log("shoulda changed p1Move")
     } 
   })
   // handle key up
   socket.on("keyPress", function(data){
     if (data.direction === "up"){
       console.log("server says received " + data.direction + " release from " + socket.id)
+      p1Move = false
     } 
     else if (data.direction === "down"){
       console.log("server says received " + data.direction + " release from " + socket.id)
+      p1Move = false
     } 
   })
   socket.on("disconnect", function(){
     console.log("disconnected")})})
 
+// setting game refresh rate
+setInterval(gameRefresh, 1000 / 7)
 
+function gameRefresh(){
+  movePaddle1()
+  movePaddle2()
+  var ballEvent = moveBall() 
+  if (ballEvent === 1){
+  // alert everyone ball velocity has hit a paddle
+  // and velocity needs to be changed
+    io.emit('tick', {vX: vX, vY: vY})
+  }
+  else if (ballEvent === 0){
+  // alert everyone the ball has hit the top/bottom boundaries
+    io.emit('tick', {vX: vX, vY: vY})
+  }
+  else if (ballEvent == -1){
+  // player has scored. 
+    io.emit('tick', {vX: vX, vY: vY})
+  }
+  
+}
+function movePaddle1(){
+  if (p1Move === true){
+    console.log("p1 " + p1) 
+    if (p1Direction === 1){
+      p1 = p1 - 10
+    }
+    else if (p1Direction === -1){
+      p1 = p1 + 10
+    }
+  }
+  else{}
+}
+
+function movePaddle2(){
+  if (p2Move == true){
+    if (p2Direction === "up"){
+      p2 = p2 - 10
+    }
+    else if (p2Direction === "down"){
+      p2 = p2 + 10
+    }
+  }
+  else{}
+}
+
+function moveBall(){
+  // handle regular moving
+  ballX = ballX + vX
+  ballY = ballY + vY
+  // handle top/bottom
+  if (ballY < 5 || ballY > height - 5){
+    vY = vY *  1
+    return 0
+  }
+  // handle left/right walls
+  if (ballX <= 30 ){
+    // creds on the guy on ricket on xna for the idea
+    // logic to calculate new vX and vY based on ball hit location relative to
+    // paddle
+    if (ballY >= p1 && ballY <= p1 + plen){
+      console.log("paddle hit")
+      var relIntersect = (p1 + (plen / 2)) - ballY + 10
+      var normalized = (relIntersect / (plen / 2))
+      angle = normalized * 5 * Math.PI / 12
+      vX = bSpeed * Math.cos(angle * (180 / Math.PI) + Math.PI / 4)
+      vX = Math.round(-1 * vX)
+      console.log("vX is " + vX)
+      vY = bSpeed * -Math.sin(angle * (180 / Math.PI) + Math.PI / 4)
+      vY = Math.ceil(-1 * vY)
+      console.log("vY is " + vY)
+      return 1
+    }
+    else{
+      console.log("game over")
+      vX = 0
+      vY = 0
+      ballX = width / 2
+      ballY = height / 2
+      return -1
+    }
+  }
+  else if (ballX >= width - 30){
+    if (ballY >= p2 && ballY <= p2 + plen){
+      console.log("paddle hit")
+      var relIntersect = (p2 + (plen / 2)) - ballY + 10
+      var normalized = (relIntersect / (plen / 2))
+      angle = normalized * 5 * Math.PI / 12
+      vX = bSpeed * Math.cos(angle * (180 / Math.PI) + Math.PI / 4)
+      vX = Math.round(1 * vX)
+      console.log("vX is " + vX)
+      vY = bSpeed * -Math.sin(angle * (180 / Math.PI) + Math.PI / 4)
+      vY = Math.ceil(-1 * vY)
+      console.log("vY is " + vY)
+      return 1
+    }
+    else{
+      console.log("game over")
+      vX = 0
+      vY = 0
+      ballX = width / 2
+      ballY = height / 2
+      return -1
+    }
+  }
+}

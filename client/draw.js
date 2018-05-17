@@ -92,6 +92,7 @@ function moveBall(){
   // handle regular moving
   ballX = ballX + vX
   ballY = ballY + vY
+  /*
   // handle top/bottom
   if (ballY < 5 || ballY > height - 5){
     vY = vY *  1
@@ -146,7 +147,7 @@ function moveBall(){
       ballY = height / 2
       return -1
     }
-  }
+  }*/
 }
 
 // handles keypresses
