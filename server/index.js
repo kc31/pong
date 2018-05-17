@@ -49,23 +49,21 @@ var vY = 0
 // what to do when socket is active
 io.on('connection', function(socket){
   console.log("made socket connection", socket.id)
-  // handle key downs
+  // when client wants to move paddle
   socket.on("keyPress", function(data){
     if (data.direction === "up"){
       console.log("server says received " + data.direction + " press from " + socket.id)
       p1Move = true
       p1Direction = 1
-      console.log("shoulda changed p1Move")
     } 
     else if (data.direction === "down"){
       console.log("server says received " + data.direction + " press from " + socket.id)
       p1Move = true
       p1Direction = -1
-      console.log("shoulda changed p1Move")
     } 
   })
   // handle key up
-  socket.on("keyPress", function(data){
+  socket.on("keyUp", function(data){
     if (data.direction === "up"){
       console.log("server says received " + data.direction + " release from " + socket.id)
       p1Move = false
@@ -78,39 +76,15 @@ io.on('connection', function(socket){
   socket.on("disconnect", function(){
     console.log("disconnected")})})
 
-// setting game refresh rate
-setInterval(gameRefresh, 1000 / 7)
 
-function gameRefresh(){
-  movePaddle1()
-  movePaddle2()
-  var ballEvent = moveBall() 
-  if (ballEvent === 1){
-  // alert everyone ball velocity has hit a paddle
-  // and velocity needs to be changed
-    io.emit('tick', {vX: vX, vY: vY})
-  }
-  else if (ballEvent === 0){
-  // alert everyone the ball has hit the top/bottom boundaries
-    io.emit('tick', {vX: vX, vY: vY})
-  }
-  else if (ballEvent == -1){
-  // player has scored. 
-    io.emit('tick', {vX: vX, vY: vY})
-  }
-  
-}
 function movePaddle1(){
-  if (p1Move === true){
-    console.log("p1 " + p1) 
-    if (p1Direction === 1){
-      p1 = p1 - 10
-    }
-    else if (p1Direction === -1){
-      p1 = p1 + 10
-    }
+  if (p1Direction === 1){
+    p1 = p1 - 10
   }
-  else{}
+  else if (p1Direction === -1){
+    p1 = p1 + 10
+  }
+  //console.log(p1Move)
 }
 
 function movePaddle2(){
@@ -185,3 +159,28 @@ function moveBall(){
     }
   }
 }
+
+function gameRefresh(){
+  if (p1Move){
+    movePaddle1()
+  }
+  //console.log("p1 " + p1)
+  movePaddle2()
+  var ballEvent = moveBall() 
+  if (ballEvent === 1){
+  // alert everyone ball velocity has hit a paddle
+  // and velocity needs to be changed
+    io.emit('tick', {vX: vX, vY: vY})
+  }
+  else if (ballEvent === 0){
+  // alert everyone the ball has hit the top/bottom boundaries
+    io.emit('tick', {vX: vX, vY: vY})
+  }
+  else if (ballEvent == -1){
+  // player has scored. 
+    io.emit('tick', {vX: vX, vY: vY})
+  }
+}
+
+// setting game refresh rate
+setInterval(gameRefresh, 1000/7) 
