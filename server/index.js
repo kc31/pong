@@ -41,12 +41,22 @@ var vY = 0
 // what to do when socket is active
 io.on('connection', function(socket){
   console.log("made socket connection", socket.id)
+  // handle key downs
   socket.on("keyPress", function(data){
     if (data.direction === "up"){
-      console.log("server says received " + data.direction)
+      console.log("server says received " + data.direction + " press from " + socket.id)
     } 
     else if (data.direction === "down"){
-      console.log("server says received " + data.direction)
+      console.log("server says received " + data.direction + " press from " + socket.id)
+    } 
+  })
+  // handle key up
+  socket.on("keyPress", function(data){
+    if (data.direction === "up"){
+      console.log("server says received " + data.direction + " release from " + socket.id)
+    } 
+    else if (data.direction === "down"){
+      console.log("server says received " + data.direction + " release from " + socket.id)
     } 
   })
   socket.on("disconnect", function(){

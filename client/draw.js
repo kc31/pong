@@ -28,17 +28,37 @@ console.log("vY " + vY)
 var vX = -bSpeed
 var vY = 0
 
+var allowed = true;
+
 $(document).keydown(function(code){
-  console.log("keypres")
-    if (code.which === 38){
-      socket.emit("keyPress", {
-      direction:"up"})
-      console.log("up")
-    }else if (code.which == 40) {
-      socket.emit("keyPress",{
-      direction: "down"})
-      console.log("down")
+  if (!allowed) return
+  allowed = false
+  if (code.which === 38){
+    socket.emit("keyPress", {
+    direction:"up",
+    p1: p1})
+    console.log("pressed up")
+  }else if (code.which == 40) {
+    socket.emit("keyPress",{
+    direction: "down",
+    p1: p1})
+    console.log("pressed down")
+    
 }})
+
+$(document).keyup(function(code){
+  if (allowed) return;
+  allowed = true 
+  if (code.which === 38){
+    socket.emit("keyUp",{
+    direction:"up"})
+    console.log("relased up")
+  }else if (code.which == 40) {
+      socket.emit("keyUp",{
+      direction: "down"})
+      console.log("release down")
+}})
+
 
 function setup(){
  var width = 600
@@ -74,7 +94,7 @@ function moveBall(){
   ballY = ballY + vY
   // handle top/bottom
   if (ballY < 5 || ballY > height - 5){
-    vY = vY * -1
+    vY = vY *  1
     return 0
   }
   // handle left/right walls
